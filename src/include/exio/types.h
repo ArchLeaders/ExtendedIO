@@ -38,7 +38,7 @@ using f32 = float;
 using f64 = double;
 
 namespace exio {
-#define exio_DEFINE_FIELDS(TYPE, ...)                                                              \
+#define EXIO_DEFINE_FIELDS(TYPE, ...)                                                              \
   constexpr auto fields() {                                                                        \
     return std::tie(__VA_ARGS__);                                                                  \
   }                                                                                                \
