@@ -21,25 +21,26 @@
 #include <string_view>
 #include <vector>
 
-#include "binaryio/types.h"
-#include "binaryio/util/swap.h"
+#include "exio/swap.h"
+#include "exio/types.h"
 
-namespace binaryio {
+namespace exio {
 
-template <typename Storage> class BinaryWriterBase {
+template <typename Storage>
+class BinaryWriterBase {
 public:
-  BinaryWriterBase(util::Endianness endian) : m_endian{endian} {}
+  BinaryWriterBase(Endianness endian) : m_endian{endian} {}
 
   /// Returns a std::vector<u8> with everything written so far, and resets the
   /// buffer.
   std::vector<u8> Finalize() { return std::move(m_data); }
 
-  const auto &Buffer() const { return m_data; }
-  auto &Buffer() { return m_data; }
+  const auto& Buffer() const { return m_data; }
+  auto& Buffer() { return m_data; }
   size_t Tell() const { return m_offset; }
   void Seek(size_t offset) { m_offset = offset; }
 
-  util::Endianness Endian() const { return m_endian; }
+  Endianness Endian() const { return m_endian; }
   BinaryReader Reader() const { return {m_data, m_endian}; }
 
   void WriteBytes(tcb::span<const u8> bytes) {
@@ -50,16 +51,15 @@ public:
     m_offset += bytes.size();
   }
 
-  template <typename T, typename std::enable_if_t<
-                            !std::is_pointer_v<T> &&
-                            std::is_trivially_copyable_v<T>> * = nullptr>
+  template <typename T, typename std::enable_if_t<!std::is_pointer_v<T> &&
+                                                  std::is_trivially_copyable_v<T>>* = nullptr>
   void Write(T value) {
     SwapIfNeededInPlace(value, m_endian);
-    WriteBytes({reinterpret_cast<const u8 *>(&value), sizeof(value)});
+    WriteBytes({reinterpret_cast<const u8*>(&value), sizeof(value)});
   }
 
   void Write(std::string_view str) {
-    WriteBytes({reinterpret_cast<const u8 *>(str.data()), str.size()});
+    WriteBytes({reinterpret_cast<const u8*>(str.data()), str.size()});
   }
   void WriteCStr(std::string_view str) {
     Write(str);
@@ -67,7 +67,7 @@ public:
   }
 
   void WriteU24(u32 value) {
-    if (m_endian == util::Endianness::Big)
+    if (m_endian == Endianness::Big)
       Write<U24<true>>(value);
     else
       Write<U24<false>>(value);
@@ -75,7 +75,8 @@ public:
 
   void WriteNul() { Write<u8>(0); }
 
-  template <typename Callable> void RunAt(size_t offset, Callable fn) {
+  template <typename Callable>
+  void RunAt(size_t offset, Callable fn) {
     const size_t current_offset = Tell();
     Seek(offset);
     fn(current_offset);
@@ -84,12 +85,10 @@ public:
 
   template <typename T>
   void WriteCurrentOffsetAt(size_t offset, size_t base = 0) {
-    RunAt(offset, [this, base](size_t current_offset) {
-      Write(T(current_offset - base));
-    });
+    RunAt(offset, [this, base](size_t current_offset) { Write(T(current_offset - base)); });
   }
 
-  void AlignUp(size_t n) { Seek(util::AlignUp(Tell(), n)); }
+  void AlignUp(size_t n) { Seek(AlignUp(Tell(), n)); }
   void GrowBuffer() {
     if (m_offset > m_data.size())
       m_data.resize(m_offset);
@@ -98,9 +97,9 @@ public:
 private:
   Storage m_data;
   size_t m_offset = 0;
-  util::Endianness m_endian;
+  Endianness m_endian;
 };
 
 using BinaryWriter = BinaryWriterBase<std::vector<u8>>;
 
-} // namespace binaryio
+}  // namespace exio

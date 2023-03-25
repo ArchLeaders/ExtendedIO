@@ -20,7 +20,7 @@
 #include <arpa/inet.h>
 #endif
 
-#include "binaryio/types.h"
+#include "exio/types.h"
 
 template <typename, template <typename> class, typename = std::void_t<>>
 struct Detect : std::false_type {};
@@ -29,9 +29,10 @@ struct Detect<T, Op, std::void_t<Op<T>>> : std::true_type {};
 
 template <typename T>
 using ExposesFieldsImpl = decltype(std::declval<T>().fields());
-template <typename T> using ExposesFields = Detect<T, ExposesFieldsImpl>;
+template <typename T>
+using ExposesFields = Detect<T, ExposesFieldsImpl>;
 
-namespace binaryio::util {
+namespace exio {
 
 enum class Endianness {
   Big,
@@ -46,10 +47,12 @@ inline Endianness GetPlatformEndianness() {
   return htonl(0x12345678) == 0x12345678 ? Endianness::Big : Endianness::Little;
 #endif
 }
-} // namespace detail
+}  // namespace detail
 
-inline u8 swap8(u8 data) { return data; }
-inline u32 swap24(const u8 *data) {
+inline u8 swap8(u8 data) {
+  return data;
+}
+inline u32 swap24(const u8* data) {
   return (data[0] << 16) | (data[1] << 8) | data[2];
 }
 
@@ -60,13 +63,25 @@ inline u32 swap24(const u8 *data) {
 #endif
 
 #ifdef _WIN32
-inline u16 swap16(u16 data) { return _byteswap_ushort(data); }
-inline u32 swap32(u32 data) { return _byteswap_ulong(data); }
-inline u64 swap64(u64 data) { return _byteswap_uint64(data); }
+inline u16 swap16(u16 data) {
+  return _byteswap_ushort(data);
+}
+inline u32 swap32(u32 data) {
+  return _byteswap_ulong(data);
+}
+inline u64 swap64(u64 data) {
+  return _byteswap_uint64(data);
+}
 #elif __linux__
-inline u16 swap16(u16 data) { return bswap_16(data); }
-inline u32 swap32(u32 data) { return bswap_32(data); }
-inline u64 swap64(u64 data) { return bswap_64(data); }
+inline u16 swap16(u16 data) {
+  return bswap_16(data);
+}
+inline u32 swap32(u32 data) {
+  return bswap_32(data);
+}
+inline u64 swap64(u64 data) {
+  return bswap_64(data);
+}
 #elif __APPLE__
 inline __attribute__((always_inline)) u16 swap16(u16 data) {
   return OSSwapInt16(data);
@@ -78,12 +93,20 @@ inline __attribute__((always_inline)) u64 swap64(u64 data) {
   return OSSwapInt64(data);
 }
 #elif __FreeBSD__
-inline u16 swap16(u16 data) { return bswap16(data); }
-inline u32 swap32(u32 data) { return bswap32(data); }
-inline u64 swap64(u64 data) { return bswap64(data); }
+inline u16 swap16(u16 data) {
+  return bswap16(data);
+}
+inline u32 swap32(u32 data) {
+  return bswap32(data);
+}
+inline u64 swap64(u64 data) {
+  return bswap64(data);
+}
 #else
 // Slow generic implementation.
-inline u16 swap16(u16 data) { return (data >> 8) | (data << 8); }
+inline u16 swap16(u16 data) {
+  return (data >> 8) | (data << 8);
+}
 inline u32 swap32(u32 data) {
   return (swap16(data) << 16) | swap16(data >> 16);
 }
@@ -92,59 +115,65 @@ inline u64 swap64(u64 data) {
 }
 #endif
 
-inline u16 swap16(const u8 *data) {
+inline u16 swap16(const u8* data) {
   u16 value;
   std::memcpy(&value, data, sizeof(u16));
 
   return swap16(value);
 }
-inline u32 swap32(const u8 *data) {
+inline u32 swap32(const u8* data) {
   u32 value;
   std::memcpy(&value, data, sizeof(u32));
 
   return swap32(value);
 }
-inline u64 swap64(const u8 *data) {
+inline u64 swap64(const u8* data) {
   u64 value;
   std::memcpy(&value, data, sizeof(u64));
 
   return swap64(value);
 }
 
-template <int count> void swap(u8 *);
+template <int count>
+void swap(u8*);
 
-template <> inline void swap<1>(u8 *) {}
+template <>
+inline void swap<1>(u8*) {}
 
-template <> inline void swap<2>(u8 *data) {
+template <>
+inline void swap<2>(u8* data) {
   const u16 value = swap16(data);
 
   std::memcpy(data, &value, sizeof(u16));
 }
 
-template <> inline void swap<4>(u8 *data) {
+template <>
+inline void swap<4>(u8* data) {
   const u32 value = swap32(data);
 
   std::memcpy(data, &value, sizeof(u32));
 }
 
-template <> inline void swap<8>(u8 *data) {
+template <>
+inline void swap<8>(u8* data) {
   const u64 value = swap64(data);
 
   std::memcpy(data, &value, sizeof(u64));
 }
 
 /// Byte swap a value.
-template <typename T> inline T SwapValue(T data) {
-  static_assert(std::is_arithmetic<T>(),
-                "function only makes sense with arithmetic types");
+template <typename T>
+inline T SwapValue(T data) {
+  static_assert(std::is_arithmetic<T>(), "function only makes sense with arithmetic types");
 
-  swap<sizeof(data)>(reinterpret_cast<u8 *>(&data));
+  swap<sizeof(data)>(reinterpret_cast<u8*>(&data));
   return data;
 }
 
 /// Swap a value if its endianness is not the same as the machine endianness.
 /// @param endian  The endianness of the value.
-template <typename T> void SwapIfNeededInPlace(T &value, Endianness endian) {
+template <typename T>
+void SwapIfNeededInPlace(T& value, Endianness endian) {
   if (detail::GetPlatformEndianness() == endian)
     return;
 
@@ -153,15 +182,13 @@ template <typename T> void SwapIfNeededInPlace(T &value, Endianness endian) {
   }
 
   if constexpr (ExposesFields<T>()) {
-    std::apply(
-        [endian](auto &...fields) {
-          (SwapIfNeededInPlace(fields, endian), ...);
-        },
-        value.fields());
+    std::apply([endian](auto&... fields) { (SwapIfNeededInPlace(fields, endian), ...); },
+               value.fields());
   }
 }
 
-template <typename T> T SwapIfNeeded(T value, Endianness endian) {
+template <typename T>
+T SwapIfNeeded(T value, Endianness endian) {
   SwapIfNeededInPlace(value, endian);
   return value;
 }
@@ -172,12 +199,13 @@ constexpr Endianness ByteOrderMarkToEndianness(u16 bom) {
 
 /// A wrapper that stores an integer in the specified endianness and
 /// automatically bytes swap when reading/writing the value.
-template <typename T, Endianness Endian> struct EndianInt {
+template <typename T, Endianness Endian>
+struct EndianInt {
   static_assert(std::is_arithmetic<T>(), "T must be an arithmetic type");
   EndianInt() = default;
   EndianInt(T val) { *this = val; }
   operator T() const { return SwapIfNeeded(raw, Endian); }
-  EndianInt &operator=(T v) {
+  EndianInt& operator=(T v) {
     raw = SwapIfNeeded(v, Endian);
     return *this;
   }
@@ -186,7 +214,9 @@ private:
   T raw;
 };
 
-template <typename T> using BeInt = EndianInt<T, Endianness::Big>;
-template <typename T> using LeInt = EndianInt<T, Endianness::Little>;
+template <typename T>
+using BeInt = EndianInt<T, Endianness::Big>;
+template <typename T>
+using LeInt = EndianInt<T, Endianness::Little>;
 
-} // namespace binaryio::util
+}  // namespace exio

@@ -1,8 +1,8 @@
-add_executable(binaryio_test ./src/main.cpp)
+add_executable(ExtendedIOTest ./src/main.cpp)
 
-target_link_libraries(binaryio_test PUBLIC binaryio)
+target_link_libraries(ExtendedIOTest PUBLIC ExtendedIO)
 
 add_test(
-    NAME binaryio_test
-    COMMAND binaryio_test ./test_file.wav
+    NAME ExtendedIOTest
+    COMMAND ExtendedIOTest ./test_file.wav
 )

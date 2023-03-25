@@ -5,15 +5,17 @@
 #include <cstddef>
 #include <type_traits>
 
-namespace binaryio::util {
-template <typename T> constexpr T AlignUp(T value, size_t size) {
+namespace exio {
+template <typename T>
+constexpr T AlignUp(T value, size_t size) {
   static_assert(std::is_unsigned<T>(), "T must be an unsigned value.");
   return static_cast<T>(value + (size - value % size) % size);
 }
 
-template <typename T> constexpr T AlignDown(T value, size_t size) {
+template <typename T>
+constexpr T AlignDown(T value, size_t size) {
   static_assert(std::is_unsigned<T>(), "T must be an unsigned value.");
   return static_cast<T>(value - value % size);
 }
 
-} // namespace binaryio::util
+}  // namespace exio

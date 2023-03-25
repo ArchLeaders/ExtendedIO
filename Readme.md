@@ -1,6 +1,6 @@
-# BinaryIO
+# Extended IO
 
-Binary IO tools from [oead](https://github.com/zeldamods/oead) cleaned up and packaged in a single library
+Simple binary IO tools from [oead](https://github.com/zeldamods/oead) cleaned up and packaged in a single library
 
 # Credits
 
@@ -11,7 +11,7 @@ Binary IO tools from [oead](https://github.com/zeldamods/oead) cleaned up and pa
 
 # License
 
-- BinaryIO is licensed under the GNU General Public License v2+
+- Extended IO (exio) is licensed under the GNU General Public License v2+
 - oead is licensed under the GNU General Public License v2+
 - The Dolphin Emulator Project is licensed under the GNU General Public License v2+
 - nonstd (`span.h` and `visit.h`) is licensed under the Boost Software License, Version 1.0

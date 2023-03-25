@@ -11,7 +11,7 @@
 #include <initializer_list>
 #include <type_traits>
 
-namespace binaryio::util {
+namespace exio {
 ///
 /// Retrieves the size of a type in bits.
 ///
@@ -19,7 +19,8 @@ namespace binaryio::util {
 ///
 /// @return the size of the type in bits.
 ///
-template <typename T> constexpr size_t BitSize() noexcept {
+template <typename T>
+constexpr size_t BitSize() noexcept {
   return sizeof(T) * CHAR_BIT;
 }
 
@@ -48,9 +49,9 @@ constexpr T ExtractBit(const T src, const size_t bit) noexcept {
 ///
 /// @return The extracted bit.
 ///
-template <size_t bit, typename T> constexpr T ExtractBit(const T src) noexcept {
-  static_assert(bit < BitSize<T>(),
-                "Specified bit must be within T's bit width.");
+template <size_t bit, typename T>
+constexpr T ExtractBit(const T src) noexcept {
+  static_assert(bit < BitSize<T>(), "Specified bit must be within T's bit width.");
 
   return ExtractBit(src, bit);
 }
@@ -69,11 +70,9 @@ template <size_t bit, typename T> constexpr T ExtractBit(const T src) noexcept {
 /// @return The extracted bits.
 ///
 template <typename T, typename Result = std::make_unsigned_t<T>>
-constexpr Result ExtractBits(const T src, const size_t begin,
-                             const size_t end) noexcept {
-  return static_cast<Result>(
-      ((static_cast<Result>(src) << ((BitSize<T>() - 1) - end)) >>
-       (BitSize<T>() - end + begin - 1)));
+constexpr Result ExtractBits(const T src, const size_t begin, const size_t end) noexcept {
+  return static_cast<Result>(((static_cast<Result>(src) << ((BitSize<T>() - 1) - end)) >>
+                              (BitSize<T>() - end + begin - 1)));
 }
 
 ///
@@ -89,12 +88,10 @@ constexpr Result ExtractBits(const T src, const size_t begin,
 ///
 /// @return The extracted bits.
 ///
-template <size_t begin, size_t end, typename T,
-          typename Result = std::make_unsigned_t<T>>
+template <size_t begin, size_t end, typename T, typename Result = std::make_unsigned_t<T>>
 constexpr Result ExtractBits(const T src) noexcept {
   static_assert(begin < end, "Beginning bit must be less than the ending bit.");
-  static_assert(begin < BitSize<T>(),
-                "Beginning bit is larger than T's bit width.");
+  static_assert(begin < BitSize<T>(), "Beginning bit is larger than T's bit width.");
   static_assert(end < BitSize<T>(), "Ending bit is larger than T's bit width.");
 
   return ExtractBits<T, Result>(src, begin, end);
@@ -153,10 +150,10 @@ constexpr T RotateRight(const T value, size_t amount) noexcept {
 ///
 /// @return A bool indicating whether the mask is valid.
 ///
-template <typename T> constexpr bool IsValidLowMask(const T mask) noexcept {
+template <typename T>
+constexpr bool IsValidLowMask(const T mask) noexcept {
   static_assert(std::is_integral<T>::value, "Mask must be an integral type.");
-  static_assert(std::is_unsigned<T>::value,
-                "Signed masks can introduce hard to find bugs.");
+  static_assert(std::is_unsigned<T>::value, "Signed masks can introduce hard to find bugs.");
 
   // Can be efficiently determined without looping or bit counting. It's the
   // counterpart to
@@ -188,7 +185,7 @@ template <typename T> constexpr bool IsValidLowMask(const T mask) noexcept {
 /// @pre Both To and From types must satisfy the TriviallyCopyable concept.
 ///
 template <typename To, typename From>
-inline To BitCast(const From &source) noexcept {
+inline To BitCast(const From& source) noexcept {
   static_assert(sizeof(From) == sizeof(To),
                 "BitCast source and destination types must be equal in size.");
   static_assert(std::is_trivially_copyable<From>(),
@@ -198,23 +195,23 @@ inline To BitCast(const From &source) noexcept {
 
   std::aligned_storage_t<sizeof(To), alignof(To)> storage;
   std::memcpy(&storage, &source, sizeof(storage));
-  return reinterpret_cast<To &>(storage);
+  return reinterpret_cast<To&>(storage);
 }
 
-template <typename T, typename PtrType> class BitCastPtrType {
+template <typename T, typename PtrType>
+class BitCastPtrType {
 public:
   static_assert(std::is_trivially_copyable<PtrType>(),
                 "BitCastPtr source type must be trivially copyable.");
   static_assert(std::is_trivially_copyable<T>(),
                 "BitCastPtr destination type must be trivially copyable.");
 
-  explicit BitCastPtrType(PtrType *ptr) : m_ptr(ptr) {}
+  explicit BitCastPtrType(PtrType* ptr) : m_ptr(ptr) {}
 
   // Enable operator= only for pointers to non-const data
   template <typename S>
-  inline typename std::enable_if<std::is_same<S, T>() &&
-                                 !std::is_const<PtrType>()>::type
-  operator=(const S &source) {
+  inline typename std::enable_if<std::is_same<S, T>() && !std::is_const<PtrType>()>::type
+  operator=(const S& source) {
     std::memcpy(m_ptr, &source, sizeof(source));
   }
 
@@ -225,7 +222,7 @@ public:
   }
 
 private:
-  PtrType *m_ptr;
+  PtrType* m_ptr;
 };
 
 // Provides an aliasing-safe alternative to reinterpret_cast'ing pointers to
@@ -233,15 +230,14 @@ private:
 // syntax. Usage: MyStruct s = BitCastPtr<MyStruct>(some_ptr);
 // BitCastPtr<MyStruct>(some_ptr) = s;
 template <typename T, typename PtrType>
-inline auto BitCastPtr(PtrType *ptr) noexcept -> BitCastPtrType<T, PtrType> {
+inline auto BitCastPtr(PtrType* ptr) noexcept -> BitCastPtrType<T, PtrType> {
   return BitCastPtrType<T, PtrType>{ptr};
 }
 
 // Similar to BitCastPtr, but specifically for aliasing structs to arrays.
-template <
-    typename ArrayType, typename T,
-    typename Container = std::array<ArrayType, sizeof(T) / sizeof(ArrayType)>>
-inline auto BitCastToArray(const T &obj) noexcept -> Container {
+template <typename ArrayType, typename T,
+          typename Container = std::array<ArrayType, sizeof(T) / sizeof(ArrayType)>>
+inline auto BitCastToArray(const T& obj) noexcept -> Container {
   static_assert(sizeof(T) % sizeof(ArrayType) == 0,
                 "Size of array type must be a factor of size of source type.");
   static_assert(std::is_trivially_copyable<T>(),
@@ -254,43 +250,37 @@ inline auto BitCastToArray(const T &obj) noexcept -> Container {
   return result;
 }
 
-template <
-    typename ArrayType, typename T,
-    typename Container = std::array<ArrayType, sizeof(T) / sizeof(ArrayType)>>
-inline void BitCastFromArray(const Container &array, T &obj) noexcept {
-  static_assert(
-      sizeof(T) % sizeof(ArrayType) == 0,
-      "Size of array type must be a factor of size of destination type.");
+template <typename ArrayType, typename T,
+          typename Container = std::array<ArrayType, sizeof(T) / sizeof(ArrayType)>>
+inline void BitCastFromArray(const Container& array, T& obj) noexcept {
+  static_assert(sizeof(T) % sizeof(ArrayType) == 0,
+                "Size of array type must be a factor of size of destination type.");
   static_assert(std::is_trivially_copyable<Container>(),
                 "BitCastFromArray array type must be trivially copyable.");
-  static_assert(
-      std::is_trivially_copyable<T>(),
-      "BitCastFromArray destination type must be trivially copyable.");
+  static_assert(std::is_trivially_copyable<T>(),
+                "BitCastFromArray destination type must be trivially copyable.");
 
   std::memcpy(&obj, array.data(), sizeof(T));
 }
 
-template <
-    typename ArrayType, typename T,
-    typename Container = std::array<ArrayType, sizeof(T) / sizeof(ArrayType)>>
-inline auto BitCastFromArray(const Container &array) noexcept -> T {
-  static_assert(
-      sizeof(T) % sizeof(ArrayType) == 0,
-      "Size of array type must be a factor of size of destination type.");
+template <typename ArrayType, typename T,
+          typename Container = std::array<ArrayType, sizeof(T) / sizeof(ArrayType)>>
+inline auto BitCastFromArray(const Container& array) noexcept -> T {
+  static_assert(sizeof(T) % sizeof(ArrayType) == 0,
+                "Size of array type must be a factor of size of destination type.");
   static_assert(std::is_trivially_copyable<Container>(),
                 "BitCastFromArray array type must be trivially copyable.");
-  static_assert(
-      std::is_trivially_copyable<T>(),
-      "BitCastFromArray destination type must be trivially copyable.");
+  static_assert(std::is_trivially_copyable<T>(),
+                "BitCastFromArray destination type must be trivially copyable.");
 
   T obj;
   std::memcpy(&obj, array.data(), sizeof(T));
   return obj;
 }
 
-template <typename T> void SetBit(T &value, size_t bit_number, bool bit_value) {
-  static_assert(std::is_unsigned<T>(),
-                "SetBit is only sane on unsigned types.");
+template <typename T>
+void SetBit(T& value, size_t bit_number, bool bit_value) {
+  static_assert(std::is_unsigned<T>(), "SetBit is only sane on unsigned types.");
 
   if (bit_value)
     value |= (T{1} << bit_number);
@@ -298,13 +288,14 @@ template <typename T> void SetBit(T &value, size_t bit_number, bool bit_value) {
     value &= ~(T{1} << bit_number);
 }
 
-template <typename T> class FlagBit {
+template <typename T>
+class FlagBit {
 public:
-  FlagBit(std::underlying_type_t<T> &bits, T bit) : m_bits(bits), m_bit(bit) {}
+  FlagBit(std::underlying_type_t<T>& bits, T bit) : m_bits(bits), m_bit(bit) {}
   explicit operator bool() const {
     return (m_bits & static_cast<std::underlying_type_t<T>>(m_bit)) != 0;
   }
-  FlagBit &operator=(const bool rhs) {
+  FlagBit& operator=(const bool rhs) {
     if (rhs)
       m_bits |= static_cast<std::underlying_type_t<T>>(m_bit);
     else
@@ -313,11 +304,12 @@ public:
   }
 
 private:
-  std::underlying_type_t<T> &m_bits;
+  std::underlying_type_t<T>& m_bits;
   T m_bit;
 };
 
-template <typename T> class Flags {
+template <typename T>
+class Flags {
 public:
   constexpr Flags() = default;
   constexpr Flags(std::initializer_list<T> bits) {
@@ -329,11 +321,9 @@ public:
   constexpr bool operator[](T bit) const {
     return (m_hex & static_cast<std::underlying_type_t<T>>(bit)) != 0;
   }
-  constexpr friend bool operator==(Flags a, Flags b) {
-    return a.m_hex == b.m_hex;
-  }
+  constexpr friend bool operator==(Flags a, Flags b) { return a.m_hex == b.m_hex; }
 
   std::underlying_type_t<T> m_hex = 0;
 };
 
-} // namespace binaryio::util
+}  // namespace exio

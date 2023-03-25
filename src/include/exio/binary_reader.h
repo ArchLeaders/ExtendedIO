@@ -23,25 +23,24 @@
 #include <nonstd/span.h>
 #include <optional>
 
-#include "binaryio/types.h"
-#include "binaryio/util/align.h"
-#include "binaryio/util/bit_utils.h"
-#include "binaryio/util/swap.h"
+#include "exio/align.h"
+#include "exio/bit_utils.h"
+#include "exio/swap.h"
+#include "exio/types.h"
 
-namespace binaryio {
+namespace exio {
 
 class BinaryReader final {
 public:
   BinaryReader() = default;
-  BinaryReader(tcb::span<const u8> data, util::Endianness endian)
-      : m_data{data}, m_endian{endian} {}
+  BinaryReader(tcb::span<const u8> data, Endianness endian) : m_data{data}, m_endian{endian} {}
 
-  const auto &span() const { return m_data; }
+  const auto& span() const { return m_data; }
   size_t Tell() const { return m_offset; }
   void Seek(size_t offset) { m_offset = offset; }
 
-  util::Endianness Endian() const { return m_endian; }
-  void SetEndian(util::Endianness endian) { m_endian = endian; }
+  Endianness Endian() const { return m_endian; }
+  void SetEndian(Endianness endian) { m_endian = endian; }
 
   template <typename T, bool Safe = true>
   std::optional<T> Read(std::optional<size_t> offset = std::nullopt) {
@@ -52,8 +51,8 @@ public:
       if (m_offset + sizeof(T) > m_data.size())
         return std::nullopt;
     }
-    T value = util::BitCastPtr<T>(&m_data[m_offset]);
-    util::SwapIfNeededInPlace(value, m_endian);
+    T value = BitCastPtr<T>(&m_data[m_offset]);
+    SwapIfNeededInPlace(value, m_endian);
     m_offset += sizeof(T);
     return value;
   }
@@ -68,15 +67,13 @@ public:
     }
     const size_t offset = m_offset;
     m_offset += 3;
-    if (m_endian == util::Endianness::Big)
-      return m_data[offset] << 16 | m_data[offset + 1] << 8 |
-             m_data[offset + 2];
+    if (m_endian == Endianness::Big)
+      return m_data[offset] << 16 | m_data[offset + 1] << 8 | m_data[offset + 2];
     return m_data[offset + 2] << 16 | m_data[offset + 1] << 8 | m_data[offset];
   }
 
   template <typename StringType = std::string>
-  StringType ReadString(size_t offset,
-                        std::optional<size_t> max_len = std::nullopt) const {
+  StringType ReadString(size_t offset, std::optional<size_t> max_len = std::nullopt) const {
     if (offset > m_data.size())
       throw std::out_of_range("Out of bounds string read");
 
@@ -84,14 +81,14 @@ public:
     if (!max_len || *max_len > m_data.size() - offset)
       max_len = m_data.size() - offset;
 
-    const char *ptr = reinterpret_cast<const char *>(&m_data[offset]);
+    const char* ptr = reinterpret_cast<const char*>(&m_data[offset]);
     return {ptr, strnlen(ptr, *max_len)};
   }
 
 private:
   tcb::span<const u8> m_data{};
   size_t m_offset = 0;
-  util::Endianness m_endian = util::Endianness::Big;
+  Endianness m_endian = Endianness::Big;
 };
 
-} // namespace binaryio
+}  // namespace exio

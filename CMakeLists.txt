@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(binaryio VERSION 3.0.0 LANGUAGES CXX)
+project(ExtendedIO VERSION 3.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -7,19 +7,21 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
 
-add_library(binaryio STATIC
-    ./src/include/binaryio/util/align.h
-    ./src/include/binaryio/util/bit_utils.h
-    ./src/include/binaryio/util/swap.h
-    ./src/include/binaryio/types.h
-    ./src/include/binaryio/binary_reader.h
-    ./src/include/binaryio/binary_writer.h
+add_library(ExtendedIO STATIC
+    ./src/include/exio/align.h
+    ./src/include/exio/binary_reader.h
+    ./src/include/exio/binary_writer.h
+    ./src/include/exio/bit_utils.h
+    ./src/include/exio/error.h
+    ./src/include/exio/magic_utils.h
+    ./src/include/exio/swap.h
+    ./src/include/exio/types.h
 )
 
-set_target_properties(binaryio PROPERTIES LINKER_LANGUAGE CXX)
-target_include_directories(binaryio PUBLIC ./src/include/)
-target_compile_options(binaryio PRIVATE -Wall -Wextra -fno-plt)
-target_include_directories(binaryio SYSTEM PUBLIC ./lib/nonstd)
+set_target_properties(ExtendedIO PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(ExtendedIO PUBLIC ./src/include/)
+target_compile_options(ExtendedIO PRIVATE -Wall -Wextra -fno-plt)
+target_include_directories(ExtendedIO SYSTEM PUBLIC ./lib/nonstd)
 
 set(BUILD_TESTING ON)
 
