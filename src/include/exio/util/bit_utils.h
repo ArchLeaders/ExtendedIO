@@ -11,7 +11,7 @@
 #include <initializer_list>
 #include <type_traits>
 
-namespace exio {
+namespace exio::util {
 ///
 /// Retrieves the size of a type in bits.
 ///
@@ -326,4 +326,4 @@ public:
   std::underlying_type_t<T> m_hex = 0;
 };
 
-}  // namespace exio
+}  // namespace exio::util

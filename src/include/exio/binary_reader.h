@@ -23,10 +23,9 @@
 #include <nonstd/span.h>
 #include <optional>
 
-#include "exio/align.h"
-#include "exio/bit_utils.h"
 #include "exio/swap.h"
 #include "exio/types.h"
+#include "exio/util/bit_utils.h"
 
 namespace exio {
 
@@ -51,7 +50,7 @@ public:
       if (m_offset + sizeof(T) > m_data.size())
         return std::nullopt;
     }
-    T value = BitCastPtr<T>(&m_data[m_offset]);
+    T value = util::BitCastPtr<T>(&m_data[m_offset]);
     SwapIfNeededInPlace(value, m_endian);
     m_offset += sizeof(T);
     return value;

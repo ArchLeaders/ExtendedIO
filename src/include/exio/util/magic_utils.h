@@ -21,7 +21,7 @@
 
 #include <array>
 
-namespace exio {
+namespace exio::util {
 
 template <size_t N>
 constexpr auto MakeMagic(const char (&magic)[N]) {
@@ -31,4 +31,4 @@ constexpr auto MakeMagic(const char (&magic)[N]) {
   return data;
 }
 
-}  // namespace exio
+}  // namespace exio::util

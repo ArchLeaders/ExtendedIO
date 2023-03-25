@@ -23,6 +23,7 @@
 
 #include "exio/swap.h"
 #include "exio/types.h"
+#include "exio/util/align.h"
 
 namespace exio {
 

@@ -8,12 +8,12 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
 
 add_library(ExtendedIO STATIC
-    ./src/include/exio/align.h
+    ./src/include/exio/util/align.h
+    ./src/include/exio/util/bit_utils.h
+    ./src/include/exio/util/magic_utils.h
     ./src/include/exio/binary_reader.h
     ./src/include/exio/binary_writer.h
-    ./src/include/exio/bit_utils.h
     ./src/include/exio/error.h
-    ./src/include/exio/magic_utils.h
     ./src/include/exio/swap.h
     ./src/include/exio/types.h
 )

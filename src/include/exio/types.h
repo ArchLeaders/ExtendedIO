@@ -18,6 +18,7 @@
  */
 
 #pragma once
+
 #include <cstdint>
 
 using u8 = std::uint8_t;
@@ -53,6 +54,11 @@ namespace exio {
   friend H AbslHashValue(H h, const TYPE& self) {                                                  \
     return H::combine(std::move(h), self.fields());                                                \
   }
+
+enum class Endianness {
+  Big,
+  Little,
+};
 
 /// Unsigned 24-bit integer.
 template <bool BigEndian>
