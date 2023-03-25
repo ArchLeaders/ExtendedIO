@@ -17,7 +17,7 @@ struct BarsHeader {
   u16 bom;
   u16 version;
   u32 asset_count;
-  exio_DEFINE_FIELDS(BarsHeader, magic, file_size, bom, version, asset_count);
+  EXIO_DEFINE_FIELDS(BarsHeader, magic, file_size, bom, version, asset_count);
 };
 
 int main(int argc, char** argv) {
