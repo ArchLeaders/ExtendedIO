@@ -57,11 +57,6 @@ namespace exio {
     return H::combine(std::move(h), self.fields());                                                \
   }
 
-enum class Endianness {
-  Big,
-  Little,
-};
-
 /// Unsigned 24-bit integer.
 template <bool BigEndian>
 struct U24 {

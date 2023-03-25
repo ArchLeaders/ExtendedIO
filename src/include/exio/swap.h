@@ -34,6 +34,11 @@ using ExposesFields = Detect<T, ExposesFieldsImpl>;
 
 namespace exio {
 
+enum class Endianness {
+  Big,
+  Little,
+};
+
 namespace detail {
 inline Endianness GetPlatformEndianness() {
 #ifdef _WIN32
