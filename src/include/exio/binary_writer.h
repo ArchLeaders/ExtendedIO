@@ -89,7 +89,7 @@ public:
     RunAt(offset, [this, base](size_t current_offset) { Write(T(current_offset - base)); });
   }
 
-  void AlignUp(size_t n) { Seek(AlignUp(Tell(), n)); }
+  void AlignUp(size_t n) { Seek(util::AlignUp(Tell(), n)); }
   void GrowBuffer() {
     if (m_offset > m_data.size())
       m_data.resize(m_offset);
