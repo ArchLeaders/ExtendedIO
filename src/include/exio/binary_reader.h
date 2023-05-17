@@ -84,6 +84,19 @@ public:
     return {ptr, strnlen(ptr, *max_len)};
   }
 
+  template <typename StringType = std::wstring>
+  StringType ReadWString(size_t offset, std::optional<size_t> max_len = std::nullopt) const {
+    if (offset > m_data.size())
+      throw std::out_of_range("Out of bounds string read");
+
+    // Ensure strnlen doesn't go out of bounds.
+    if (!max_len || *max_len > m_data.size() - offset)
+      max_len = m_data.size() - offset;
+
+    const wchar_t* ptr = reinterpret_cast<const wchar_t*>(&m_data[offset]);
+    return {ptr, wcslen(ptr)};
+  }
+
 private:
   tcb::span<const u8> m_data{};
   size_t m_offset = 0;
