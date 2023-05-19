@@ -17,13 +17,17 @@
  * along with syaz0.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#pragma once
+
 #include <iostream>
 #include <string_view>
 #include <vector>
 
+#include "exio/binary_reader.h"
 #include "exio/swap.h"
 #include "exio/types.h"
 #include "exio/util/align.h"
+#include "nonstd/span.h"
 
 namespace exio {
 
