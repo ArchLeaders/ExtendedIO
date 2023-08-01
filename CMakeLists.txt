@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
 
-add_library(ExtendedIO STATIC
+add_library(ExtendedIO INTERFACE
     ./src/include/exio/util/align.h
     ./src/include/exio/util/bit_utils.h
     ./src/include/exio/util/magic_utils.h
@@ -19,9 +19,9 @@ add_library(ExtendedIO STATIC
 )
 
 set_target_properties(ExtendedIO PROPERTIES LINKER_LANGUAGE CXX)
-target_include_directories(ExtendedIO PUBLIC ./src/include/)
-target_compile_options(ExtendedIO PRIVATE -Wall -Wextra -fno-plt)
-target_include_directories(ExtendedIO SYSTEM PUBLIC ./lib/nonstd)
+target_include_directories(ExtendedIO INTERFACE ./src/include/)
+target_compile_options(ExtendedIO INTERFACE -Wall -Wextra -fno-plt)
+target_include_directories(ExtendedIO SYSTEM INTERFACE ./lib/nonstd)
 
 set(BUILD_TESTING ON)
 
