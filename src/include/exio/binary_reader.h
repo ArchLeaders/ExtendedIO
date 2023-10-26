@@ -94,7 +94,8 @@ public:
       max_len = m_data.size() - offset;
 
     const wchar_t* ptr = reinterpret_cast<const wchar_t*>(&m_data[offset]);
-    return {ptr, wcslen(ptr)};
+    auto result = StringType{ptr, wcslen(ptr)};
+    return result.size() > max_len && max_len ? result.substr(0, *max_len) : result;
   }
 
 private:
